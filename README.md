@@ -1,4 +1,4 @@
-#Introduction
+# Brief explanation 
 
 This project implements a complete chess game using Java and object-oriented programming principles.
 The application provides a graphical user interface where two players can play chess following standard rules,
