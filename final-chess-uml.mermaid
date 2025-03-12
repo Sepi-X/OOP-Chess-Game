@@ -1,0 +1,182 @@
+classDiagram
+    class Piece {
+        <<abstract>>
+        -BufferedImage image
+        -int x, y
+        -int col, row, preCol, preRow
+        -int color
+        +Piece(int color, int col, int row)
+        +setX(int x) void
+        +setY(int y) void
+        +setCol(int col) void
+        +setRow(int row) void
+        +setPreCol(int preCol) void
+        +setPreRow(int preRow) void
+        +setColor(int color) void
+        +getCol() int
+        +getRow() int
+        +getPreCol() int
+        +getPreRow() int
+        +getColor() int
+        +getImage(String imagePath) BufferedImage
+        +setImage(BufferedImage image) void
+        +getX(int col) int
+        +getY(int row) int
+        +getCol(int x) int
+        +getRow(int y) int
+        +updatePosition() void
+        +canMove(int targetCol, int targetRow)* boolean
+        +isWithinBoard(int targetCol, int targetRow) boolean
+        +checkPath(int targetCol, int targetRow) boolean
+        +checkSpot(int targetCol, int targetRow) boolean
+        +draw(Graphics2D g2) void
+    }
+
+    class Bishop {
+        +Bishop(int color, int col, int row)
+        +canMove(int targetCol, int targetRow) boolean
+    }
+
+    class King {
+        -boolean hasMoved
+        +King(int color, int col, int row)
+        +canMove(int targetCol, int targetRow) boolean
+        -canCastle(int targetCol) boolean
+        +performCastling(int targetCol) void
+        +updatePosition() void
+    }
+
+    class Knight {
+        +Knight(int color, int col, int row)
+        +canMove(int targetCol, int targetRow) boolean
+    }
+
+    class Pawn {
+        -boolean hasMoved
+        +Pawn(int color, int col, int row)
+        +canBePromoted() boolean
+        +canMove(int targetCol, int targetRow) boolean
+        +updatePosition() void
+    }
+
+    class Queen {
+        +Queen(int color, int col, int row)
+        +canMove(int targetCol, int targetRow) boolean
+    }
+
+    class Rook {
+        -boolean hasMoved
+        +Rook(int color, int col, int row)
+        +canMove(int targetCol, int targetRow) boolean
+        +updatePosition() void
+        +hasMoved() boolean
+    }
+
+    class GamePanel {
+        +static int WIDTH
+        +static int HEIGHT
+        -final int FPS
+        -Thread gameThread
+        -Board board
+        -Mouse mouse
+        +static ArrayList~Piece~ pieces
+        +static ArrayList~Piece~ simPieces
+        -Piece activeP
+        +static final int WHITE
+        +static final int BLACK
+        -int currentColor
+        -int startCol, startRow
+        -int gameState
+        -boolean gameOver
+        -String statusMessage
+        +GamePanel()
+        +launchGame() void
+        -setPieces() void
+        -copyPieces(ArrayList~Piece~ source, ArrayList~Piece~ target) void
+        +run() void
+        -handlePawnPromotion(Pawn pawn) void
+        -update() void
+        -updateStatusMessage() void
+        +paintComponent(Graphics g) void
+        +static isKingInCheck(int kingColor) boolean
+        -isSquareProtectedByEnemy(int col, int row, int kingColor) boolean
+        -isSquareAttackedByOpponent(int col, int row, int color, Piece excludePiece) boolean
+        -clonePieceList(ArrayList~Piece~ original) ArrayList~Piece~
+        -simulateKingInCheck(Piece kingPiece, int targetCol, int targetRow) boolean
+        -isLegalMove(Piece piece, int targetCol, int targetRow) boolean
+        -checkForKingCapture() void
+        -isCheckmate() boolean
+        -isLegalKingCapture(King king, int targetCol, int targetRow) boolean
+        -autoCaptureFoolishKing() void
+        -captureKing(Piece capturingPiece, King targetKing) void
+    }
+
+    class main {
+        <<entry-point>>
+        +static main(String[] args) void
+    }
+
+    class Runnable {
+        <<interface>>
+        +run() void
+    }
+
+    class JPanel {
+        <<class>>
+    }
+
+    class MouseAdapter {
+        <<class>>
+    }
+
+    class Board {
+        -final int MAX_COL
+        -final int MAX_ROW
+        +static final int SQUARE_SIZE
+        +static final int HALF_SQUARE_SIZE
+        +draw(Graphics2D g2) void
+        +isValidPosition(int col, int row) boolean
+    }
+
+    class GameState {
+        <<utility>>
+        +static final int ONGOING
+        +static final int CHECK
+        +static final int CHECKMATE
+        +static final int STALEMATE
+        -static boolean isDebugging
+        +static isKingInCheck(ArrayList~Piece~ pieces, int kingColor) boolean
+        +static isSquareAttacked(ArrayList~Piece~ pieces, int col, int row, int defenderColor) boolean
+        +static isSquareProtected(ArrayList~Piece~ pieces, int col, int row, int attackerColor, Piece excludePiece) boolean
+        +static getGameState(ArrayList~Piece~ pieces, int currentColor) int
+        +static printAllPossibleMoves(ArrayList~Piece~ pieces, int currentColor) void
+        -static hasLegalMove(ArrayList~Piece~ pieces, int currentColor) boolean
+        -static clonePieceList(ArrayList~Piece~ original) ArrayList~Piece~
+        +static isLegalMove(ArrayList~Piece~ pieces, Piece piece, int targetCol, int targetRow) boolean
+        +static isCastlingLegal(ArrayList~Piece~ pieces, King king, int targetCol) boolean
+    }
+
+    class Mouse {
+        +int x
+        +int y
+        +boolean clicked
+        +mousePressed(MouseEvent e) void
+        +mouseReleased(MouseEvent e) void
+        +mouseDragged(MouseEvent e) void
+        +mouseMoved(MouseEvent e) void
+        +resetClick() void
+    }
+
+    Piece <|-- Bishop
+    Piece <|-- King
+    Piece <|-- Knight
+    Piece <|-- Pawn
+    Piece <|-- Queen
+    Piece <|-- Rook
+    Runnable <|.. GamePanel
+    JPanel <|-- GamePanel
+    MouseAdapter <|-- Mouse
+    GamePanel o-- Board
+    GamePanel o-- Mouse
+    GamePanel *-- "many" Piece
+    main ..> GamePanel : creates
