@@ -10,7 +10,6 @@ public class GameState {
     public static final int ONGOING = 0;
     public static final int CHECK = 1;
     public static final int CHECKMATE = 2;
-    public static final int STALEMATE = 3;
 
     // Flag to prevent recursive debugging output
     private static boolean isDebugging = false;
@@ -158,7 +157,7 @@ public class GameState {
     }
 
     /**
-     * Determines the game state: ongoing, check, checkmate, or stalemate
+     * Determines the game state: ongoing, check, checkmate.
      */
     public static int getGameState(ArrayList<Piece> pieces, int currentColor) {
         boolean isInCheck = isKingInCheck(pieces, currentColor);
@@ -171,11 +170,7 @@ public class GameState {
                     ", has legal moves: " + hasLegalMove);
         }
 
-        // If not in check and no legal moves, it's stalemate
-        // If in check and no legal moves, it's checkmate
-        if (!hasLegalMove) {
-            return isInCheck ? CHECKMATE : STALEMATE;
-        }
+
 
         // If in check but has legal moves, it's just check
         if (isInCheck) {
