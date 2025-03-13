@@ -118,7 +118,8 @@ public abstract class Piece {
 
     public boolean checkSpot(int targetCol, int targetRow) {
         for (Piece piece : GamePanel.simPieces) {
-            if (piece != this && piece.getCol() == targetCol && piece.getRow() == targetRow) {                return true;  // Found a piece at target location
+            if (piece != this && piece.getCol() == targetCol && piece.getRow() == targetRow) {
+                return true;  // Found a piece at target location
             }
         }
         return false;
