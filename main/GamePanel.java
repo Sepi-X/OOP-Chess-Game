@@ -659,7 +659,6 @@ public class GamePanel extends JPanel implements Runnable {
 		// The move is legal only if it doesn't leave the king in check
 		return !kingInCheck;
 	}
-	// Add this method to GamePanel.java to detect if a king has been captured
 
 	/**
 	 * Special method to accurately determine if the game is in checkmate
