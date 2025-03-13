@@ -98,6 +98,7 @@ public class GamePanel extends JPanel implements Runnable {
 		pieces.add(new Queen(BLACK, 3, 0));
 		pieces.add(new King(BLACK, 4, 0));
 	}
+
 	private void copyPieces(ArrayList<Piece> source, ArrayList<Piece> target) {
 		target.clear();
 		for (int i = 0; i < source.size(); i++) {
@@ -352,6 +353,7 @@ public class GamePanel extends JPanel implements Runnable {
 								System.out.println("CHECK - King can still escape");
 							}
 						} else {
+							// Not in check, but check
 							boolean hasLegalMoves = false;
 
 							// Check if any piece has a legal move
@@ -370,7 +372,13 @@ public class GamePanel extends JPanel implements Runnable {
 								}
 							}
 
-
+							if (hasLegalMoves) {
+								gameState = GameState.ONGOING;
+							} else {
+								gameState = GameState.STALEMATE;
+								gameOver = true;
+								System.out.println("STALEMATE - no legal moves but not in check");
+							}
 						}
 					}
 
@@ -379,7 +387,7 @@ public class GamePanel extends JPanel implements Runnable {
 
 					// If game is over, print message
 					if (gameOver) {
-						System.out.println("GAME OVER: " + (gameState == GameState.CHECKMATE ? "Checkmate" : ""));
+						System.out.println("GAME OVER: " + (gameState == GameState.CHECKMATE ? "Checkmate" : "Stalemate"));
 					}
 				} else {
 					// Invalid move - either clicked elsewhere on board or clicked invalid destination
@@ -415,6 +423,9 @@ public class GamePanel extends JPanel implements Runnable {
 			case GameState.CHECKMATE:
 				String winner = (currentColor == WHITE) ? "Black" : "White";
 				statusMessage = "Checkmate! " + winner + " wins!";
+				break;
+			case GameState.STALEMATE:
+				statusMessage = "Stalemate! The game is a draw.";
 				break;
 			default:
 				statusMessage = "";
