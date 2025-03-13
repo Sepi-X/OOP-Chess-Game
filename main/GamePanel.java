@@ -424,7 +424,9 @@ public class GamePanel extends JPanel implements Runnable {
 		}
 	}
 
+	//helper method
 	private void updateStatusMessage() {
+		//determines the color
 		String colorName = (currentColor == WHITE) ? "White" : "Black";
 
 		switch (gameState) {
@@ -436,7 +438,7 @@ public class GamePanel extends JPanel implements Runnable {
 				statusMessage = "Checkmate! " + winner + " wins!";
 				break;
 			case GameState.STALEMATE:
-				statusMessage = "Stalemate! The game is a draw.";
+				statusMessage = "Stalemate! ";
 				break;
 			default:
 				statusMessage = "";
@@ -444,8 +446,8 @@ public class GamePanel extends JPanel implements Runnable {
 	}
 
 	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		Graphics2D g2 = (Graphics2D)g;
+		super.paintComponent(g); // parent class repaint the component
+		Graphics2D g2 = (Graphics2D)g; // Converts Graphics to Graphics2D
 
 		// Draw board
 		board.draw(g2);
@@ -469,7 +471,7 @@ public class GamePanel extends JPanel implements Runnable {
 			}
 		}
 
-		// Highlight king in red if it's in check
+		// Highlight king in red if it's in check or checkmate
 		if (gameState == GameState.CHECK || gameState == GameState.CHECKMATE) {
 			for (Piece p : simPieces) {
 				if (p instanceof King && p.getColor() == currentColor) {
@@ -483,7 +485,7 @@ public class GamePanel extends JPanel implements Runnable {
 
 		// Draw all pieces
 		for (Piece p : simPieces) {
-			p.draw(g2);
+			p.draw(g2);// calls for each piece
 		}
 
 		// Draw game status message
@@ -516,201 +518,10 @@ public class GamePanel extends JPanel implements Runnable {
 	}
 
 	public static boolean isKingInCheck(int kingColor) {
+
 		return GameState.isKingInCheck(simPieces, kingColor);
 	}
-	/**
-	 * Checks if a square is protected by any enemy piece
-	 * Used specifically to prevent kings from moving to protected squares
-	 */
-	private boolean isSquareProtectedByEnemy(int col, int row, int kingColor) {
-		// Check all pieces of opposite color to see if any can move to this square
-		for (Piece defender : simPieces) {
-			// Skip pieces of the same color as the king
-			if (defender.getColor() == kingColor) {
-				continue;
-			}
 
-			// Check if this piece can move to the target square
-			if (defender.canMove(col, row)) {
-				// Need to check for path obstruction - the defending piece might be blocked
-				if (defender.checkPath(col, row)) {
-					continue; // Path is blocked
-				}
-
-				// The square is protected by an enemy piece
-				return true;
-			}
-		}
-
-		return false; // No enemy pieces can move to this square
-	}
-	/**
-	 * Minimal fix for kings capturing protected pieces
-	 * This method should be added to GamePanel.java
-	 */
-	private boolean isSquareAttackedByOpponent(int col, int row, int color, Piece excludePiece) {
-		// Check if any opponent's piece can attack this square
-		for (Piece attacker : simPieces) {
-			// Skip pieces of our color and the excluded piece (if any)
-			if (attacker.getColor() == color || attacker == excludePiece) {
-				continue;
-			}
-
-			// Can this piece attack the square?
-			if (attacker.canMove(col, row)) {
-				// For non-knight pieces, check if the path is clear
-				if (!(attacker instanceof Knight) && attacker.checkPath(col, row)) {
-					continue; // Path is blocked
-				}
-				return true; // Square is attacked
-			}
-		}
-		return false; // Square is not attacked
-	}
-
-	/**
-	 * Replacement for isLegalMove in GamePanel.java
-	 */
-
-
-	/**
-	 * Add these methods to GamePanel.java for a complete simulation-based solution
-	 */
-
-	/**
-	 * Creates a deep copy of the pieces list for simulation purposes
-	 */
-	private ArrayList<Piece> clonePieceList(ArrayList<Piece> original) {
-		ArrayList<Piece> copy = new ArrayList<>();
-
-		// Create new reference objects but with the same properties
-		for (Piece p : original) {
-			Piece clonedPiece = null;
-
-			// Create the appropriate piece type with the same properties
-			if (p instanceof King) {
-				clonedPiece = new King(p.getColor(), p.getCol(), p.getRow());
-			} else if (p instanceof Queen) {
-				clonedPiece = new Queen(p.getColor(), p.getCol(), p.getRow());
-			} else if (p instanceof Rook) {
-				clonedPiece = new Rook(p.getColor(), p.getCol(), p.getRow());
-			} else if (p instanceof Bishop) {
-				clonedPiece = new Bishop(p.getColor(), p.getCol(), p.getRow());
-			} else if (p instanceof Knight) {
-				clonedPiece = new Knight(p.getColor(), p.getCol(), p.getRow());
-			} else if (p instanceof Pawn) {
-				clonedPiece = new Pawn(p.getColor(), p.getCol(), p.getRow());
-			}
-
-			// Set other properties, if needed
-			if (clonedPiece != null) {
-				clonedPiece.setPreCol(p.getPreCol());
-				clonedPiece.setPreRow(p.getPreRow());
-				copy.add(clonedPiece);
-			}
-		}
-
-		return copy;
-	}
-
-	/**
-	 * Directly simulate if a king would be in check after a move
-	 * This doesn't rely on other methods that might have bugs
-	 */
-	private boolean simulateKingInCheck(Piece kingPiece, int targetCol, int targetRow) {
-		// Clone the board state for simulation
-		ArrayList<Piece> simulatedBoard = clonePieceList(simPieces);
-
-		// Find the king and any captured piece in the simulated board
-		Piece simKing = null;
-		Piece capturedPiece = null;
-
-		for (Piece p : simulatedBoard) {
-			// Find the king
-			if (p.getColor() == kingPiece.getColor() && p instanceof King) {
-				simKing = p;
-			}
-
-			// Find any piece at the target location (to be captured)
-			if (p.getCol() == targetCol && p.getRow() == targetRow) {
-				capturedPiece = p;
-			}
-
-			// If we found both, we can stop searching
-			if (simKing != null && capturedPiece != null) {
-				break;
-			}
-		}
-
-		// Remove captured piece if it exists and isn't the same color as the king
-		if (capturedPiece != null && capturedPiece.getColor() != kingPiece.getColor()) {
-			simulatedBoard.remove(capturedPiece);
-		}
-
-		// Move the king to the target position
-		if (simKing != null) {
-			simKing.setCol(targetCol);
-			simKing.setRow(targetRow);
-		}
-
-		// Now check if the king would be in check in this position
-		// Check if any opponent piece can attack the king's new position
-		for (Piece attacker : simulatedBoard) {
-			// Skip pieces of the same color as the king
-			if (attacker.getColor() == kingPiece.getColor()) {
-				continue;
-			}
-
-			// Can this piece attack the king's new position?
-			if (attacker.canMove(targetCol, targetRow)) {
-				// For pieces that need a clear path, check if the path is clear
-				boolean pathIsBlocked = false;
-
-				if (!(attacker instanceof Knight)) {
-					// Check if any piece blocks the path
-					int startCol = attacker.getCol();
-					int startRow = attacker.getRow();
-
-					// Calculate direction of movement
-					int colDirection = Integer.compare(targetCol, startCol);
-					int rowDirection = Integer.compare(targetRow, startRow);
-
-					// Start checking from the square after the attacker
-					int currentCol = startCol + colDirection;
-					int currentRow = startRow + rowDirection;
-
-					// Check each square until we reach the target (exclusive)
-					while (currentCol != targetCol || currentRow != targetRow) {
-						// Check if any piece is on this square
-						for (Piece blockingPiece : simulatedBoard) {
-							if (blockingPiece.getCol() == currentCol && blockingPiece.getRow() == currentRow) {
-								pathIsBlocked = true;
-								break;
-							}
-						}
-
-						if (pathIsBlocked) {
-							break;
-						}
-
-						currentCol += colDirection;
-						currentRow += rowDirection;
-					}
-				}
-
-				// If path is not blocked, the king would be in check
-				if (!pathIsBlocked) {
-					System.out.println("DEBUG: King would be in check from " +
-							attacker.getClass().getSimpleName() +
-							" at " + attacker.getCol() + "," + attacker.getRow());
-					return true;
-				}
-			}
-		}
-
-		// If we got here, the king would not be in check
-		return false;
-	}
 
 
 	/**
@@ -849,36 +660,7 @@ public class GamePanel extends JPanel implements Runnable {
 		return !kingInCheck;
 	}
 	// Add this method to GamePanel.java to detect if a king has been captured
-	private void checkForKingCapture() {
-		// Check if either king is missing
-		boolean whiteKingExists = false;
-		boolean blackKingExists = false;
 
-		for (Piece p : simPieces) {
-			if (p instanceof King) {
-				if (p.getColor() == WHITE) {
-					whiteKingExists = true;
-				} else {
-					blackKingExists = true;
-				}
-			}
-		}
-
-		// If a king is missing, the game should end immediately
-		if (!whiteKingExists) {
-			System.out.println("ERROR: White king has been captured! Game should end with Black winning.");
-			gameState = GameState.CHECKMATE;
-			currentColor = BLACK; // Set black as winner
-			gameOver = true;
-			statusMessage = "Checkmate! Black wins!";
-		} else if (!blackKingExists) {
-			System.out.println("ERROR: Black king has been captured! Game should end with White winning.");
-			gameState = GameState.CHECKMATE;
-			currentColor = WHITE; // Set white as winner
-			gameOver = true;
-			statusMessage = "Checkmate! White wins!";
-		}
-	}
 	/**
 	 * Special method to accurately determine if the game is in checkmate
 	 * Add this method to your GamePanel class
@@ -955,94 +737,8 @@ public class GamePanel extends JPanel implements Runnable {
 		System.out.println("CHECKMATE confirmed - no legal moves found");
 		return true;
 	}
-	/**
-	 * Special method to check if a king's move to capture an attacker is legal
-	 * This ensures kings can capture unprotected attacking pieces
-	 */
-	private boolean isLegalKingCapture(King king, int targetCol, int targetRow) {
-		// Find the piece at the target position
-		Piece targetPiece = null;
-		for (Piece p : simPieces) {
-			if (p != king && p.getCol() == targetCol && p.getRow() == targetRow) {
-				targetPiece = p;
-				break;
-			}
-		}
 
-		// If no piece at target or same color piece, not a legal capture
-		if (targetPiece == null || targetPiece.getColor() == king.getColor()) {
-			return false;
-		}
 
-		System.out.println("King considering capture of " + targetPiece.getClass().getSimpleName() +
-				" at " + targetCol + "," + targetRow);
-
-		// Check if the target square is protected by any OTHER enemy piece
-		// We need to exclude the piece being captured from the protection check
-		for (Piece defender : simPieces) {
-			// Skip the piece being captured and pieces of same color as king
-			if (defender == targetPiece || defender.getColor() == king.getColor()) {
-				continue;
-			}
-
-			System.out.println("Checking if " + defender.getClass().getSimpleName() +
-					" at " + defender.getCol() + "," + defender.getRow() +
-					" protects the target square");
-
-			// Can this piece move to the target square?
-			if (defender.canMove(targetCol, targetRow)) {
-				// For pieces that need a clear path, check if the path is clear
-				if (!(defender instanceof Knight)) {
-					boolean pathBlocked = false;
-
-					// Calculate direction from defender to target
-					int colDirection = Integer.compare(targetCol, defender.getCol());
-					int rowDirection = Integer.compare(targetRow, defender.getRow());
-
-					// Start checking from the square after the defender
-					int currentCol = defender.getCol() + colDirection;
-					int currentRow = defender.getRow() + rowDirection;
-
-					// Check each square until we reach the target (exclusive)
-					while (currentCol != targetCol || currentRow != targetRow) {
-						// Check if any piece is on this square
-						for (Piece blockingPiece : simPieces) {
-							if (blockingPiece != targetPiece && // Skip the piece being captured
-									blockingPiece.getCol() == currentCol &&
-									blockingPiece.getRow() == currentRow) {
-								pathBlocked = true;
-								System.out.println("Path is blocked by " +
-										blockingPiece.getClass().getSimpleName() +
-										" at " + currentCol + "," + currentRow);
-								break;
-							}
-						}
-
-						if (pathBlocked) {
-							break;
-						}
-
-						currentCol += colDirection;
-						currentRow += rowDirection;
-					}
-
-					// If path is blocked, this piece doesn't protect the target
-					if (pathBlocked) {
-						continue;
-					}
-				}
-
-				// If we get here, the piece protects the target
-				System.out.println("Target is protected by " + defender.getClass().getSimpleName() +
-						" at " + defender.getCol() + "," + defender.getRow());
-				return false;
-			}
-		}
-
-		// If we get here, the target is not protected by any other piece
-		System.out.println("King can safely capture unprotected attacker!");
-		return true;
-	}
 
 	/**
 	 * Add this method to your GamePanel class to automatically capture kings
