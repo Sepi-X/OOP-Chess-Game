@@ -98,7 +98,6 @@ public class GamePanel extends JPanel implements Runnable {
 		pieces.add(new Queen(BLACK, 3, 0));
 		pieces.add(new King(BLACK, 4, 0));
 	}
-
 	private void copyPieces(ArrayList<Piece> source, ArrayList<Piece> target) {
 		target.clear();
 		for (int i = 0; i < source.size(); i++) {
@@ -214,7 +213,7 @@ public class GamePanel extends JPanel implements Runnable {
 			return;
 		}
 
-		// If we have a new game state (check, checkmate, stalemate), update the message
+		// If we have a new game state (check, checkmate), update the message
 		if (gameState != GameState.ONGOING) {
 			updateStatusMessage();
 		}
@@ -335,7 +334,7 @@ public class GamePanel extends JPanel implements Runnable {
 					// function handle it on the next update cycle - no need to
 					// check for checkmate here
 
-					// Only check for check/checkmate/stalemate if we didn't just capture a protected piece
+					// Only check for check/checkmate if we didn't just capture a protected piece
 					if (!capturedProtectedPiece) {
 						// Check if this move put the opponent's king in check
 						boolean kingInCheck = GameState.isKingInCheck(simPieces, currentColor);
@@ -353,7 +352,6 @@ public class GamePanel extends JPanel implements Runnable {
 								System.out.println("CHECK - King can still escape");
 							}
 						} else {
-							// Not in check, but check for stalemate
 							boolean hasLegalMoves = false;
 
 							// Check if any piece has a legal move
@@ -372,13 +370,7 @@ public class GamePanel extends JPanel implements Runnable {
 								}
 							}
 
-							if (hasLegalMoves) {
-								gameState = GameState.ONGOING;
-							} else {
-								gameState = GameState.STALEMATE;
-								gameOver = true;
-								System.out.println("STALEMATE - no legal moves but not in check");
-							}
+
 						}
 					}
 
@@ -387,7 +379,7 @@ public class GamePanel extends JPanel implements Runnable {
 
 					// If game is over, print message
 					if (gameOver) {
-						System.out.println("GAME OVER: " + (gameState == GameState.CHECKMATE ? "Checkmate" : "Stalemate"));
+						System.out.println("GAME OVER: " + (gameState == GameState.CHECKMATE ? "Checkmate" : ""));
 					}
 				} else {
 					// Invalid move - either clicked elsewhere on board or clicked invalid destination
@@ -423,9 +415,6 @@ public class GamePanel extends JPanel implements Runnable {
 			case GameState.CHECKMATE:
 				String winner = (currentColor == WHITE) ? "Black" : "White";
 				statusMessage = "Checkmate! " + winner + " wins!";
-				break;
-			case GameState.STALEMATE:
-				statusMessage = "Stalemate! The game is a draw.";
 				break;
 			default:
 				statusMessage = "";
