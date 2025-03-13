@@ -20,47 +20,55 @@ import piece.Rook;
 
 public class GamePanel extends JPanel implements Runnable {
 
+	//game window size
 	public static  int WIDTH = 1100;
 	public static  int HEIGHT = 800;
+	//Frame Per Second
 	final int FPS = 60;
+	//Manages the game loop
 	Thread gameThread;
-	Board board = new Board();
-	Mouse mouse = new Mouse();
 
-	// PIECES
-	public static ArrayList<Piece> pieces = new ArrayList<>();
-	public static ArrayList<Piece> simPieces = new ArrayList<>();
-	Piece activeP;
+	Board board = new Board(); //chessboard
+	Mouse mouse = new Mouse(); //Mouse Interaction
 
-	// COLOR
+	// Pieces Storage
+	public static ArrayList<Piece> pieces = new ArrayList<>();//stores all active pieces
+	public static ArrayList<Piece> simPieces = new ArrayList<>();//copy of pieces
+	Piece activeP;//currently selected (active) piece
+
+	// Color Constants
 	public static final int WHITE = 0;
 	public static final int BLACK = 1;
-	int currentColor = WHITE;
+	int currentColor = WHITE;// keeps track of turns
 
-	// Track piece original position for invalid moves
+	// Variables for Move Validation
 	private int startCol;
 	private int startRow;
 
 	// Game state variables
-	private int gameState = GameState.ONGOING;
-	private boolean gameOver = false;
-	private String statusMessage = "";
+	private int gameState = GameState.ONGOING; //stores the current state
+	private boolean gameOver = false; // true = game ends
+	private String statusMessage = ""; //store messages
 
+	//Constructor & Initialization
 	public GamePanel() {
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
-		setBackground(Color.black);
+		setBackground(Color.gray);
+		// Mouse move pieces
 		addMouseMotionListener(mouse);
 		addMouseListener(mouse);
 
-		setPieces();
-		copyPieces(pieces, simPieces);
+		setPieces(); //set pieces in further (initializes all pieces)
+		copyPieces(pieces, simPieces);// copy pieces for simulate
 	}
 
+	//Launching the Game
 	public void launchGame() {
 		gameThread = new Thread(this);
 		gameThread.start();
 	}
 
+	//Initializing chess pieces
 	public void setPieces() {
 		// White team
 		pieces.add(new Pawn(WHITE, 0, 6));
@@ -99,6 +107,7 @@ public class GamePanel extends JPanel implements Runnable {
 		pieces.add(new King(BLACK, 4, 0));
 	}
 
+	//Helper method for Copying Chess Pieces(simulating moves)
 	private void copyPieces(ArrayList<Piece> source, ArrayList<Piece> target) {
 		target.clear();
 		for (int i = 0; i < source.size(); i++) {
@@ -106,7 +115,8 @@ public class GamePanel extends JPanel implements Runnable {
 		}
 	}
 
-	@Override
+	//Game Loop (Thread Execution)
+	@Override // from the interface runnable
 	public void run() {
 		double drawInterval = 1000000000/FPS;
 		double delta = 0;
@@ -119,15 +129,16 @@ public class GamePanel extends JPanel implements Runnable {
 			lastTime = currentTime;
 
 			if (delta >= 1) {
-				update();
-				repaint();
-				delta--;
+				update(); // update game state
+				repaint(); // redraw the screen
+				delta--; // prepare for the next frame
 			}
 		}
 	}
 
 	private void handlePawnPromotion(Pawn pawn) {
 		String[] options = {"Queen", "Rook", "Bishop", "Knight"};
+		//Displays dialog asking
 		int choice = JOptionPane.showOptionDialog(
 				this,
 				"Choose promotion piece:",
@@ -139,7 +150,9 @@ public class GamePanel extends JPanel implements Runnable {
 				options[0]
 		);
 
+		//Initializes for the new promotion piece
 		Piece newPiece = null;
+		//current position
 		int col = pawn.getCol();
 		int row = pawn.getRow();
 		int color = pawn.getColor();
@@ -161,10 +174,11 @@ public class GamePanel extends JPanel implements Runnable {
 				newPiece = new Queen(color, col, row);
 		}
 
-		simPieces.remove(pawn);
-		simPieces.add(newPiece);
+		simPieces.remove(pawn); // removes the pawn
+		simPieces.add(newPiece); // new promoted piece
 	}
 
+	//method continuously updates the game state
 	private void update() {
 		if (gameOver) {
 			// Game is over, no more moves allowed
@@ -182,31 +196,32 @@ public class GamePanel extends JPanel implements Runnable {
 			return;
 		}
 
-		// Check if a king has been captured (which should never happen in legal chess)
-		// We need to make sure we don't modify the collection while iterating
+		// Check if a king has been captured
 		boolean whiteKingExists = false;
 		boolean blackKingExists = false;
 
+		//checks the king is still exist
 		for (Piece p : simPieces) {
 			if (p instanceof King) {
 				if (p.getColor() == WHITE) {
 					whiteKingExists = true;
-				} else {
+				}
+				else {
 					blackKingExists = true;
 				}
 			}
 		}
 
-		// If a king is missing, the game should end immediately
+		// If Black King is missing, the game should end immediately
 		if (!whiteKingExists) {
-			System.out.println("ERROR: White king has been captured! Game should end with Black winning.");
 			gameState = GameState.CHECKMATE;
 			currentColor = BLACK; // Set black as winner
 			gameOver = true;
 			statusMessage = "Checkmate! Black wins!";
 			return;
-		} else if (!blackKingExists) {
-			System.out.println("ERROR: Black king has been captured! Game should end with White winning.");
+			//If Black King is missing, the game should end immediately
+		}
+		else if (!blackKingExists) {
 			gameState = GameState.CHECKMATE;
 			currentColor = WHITE; // Set white as winner
 			gameOver = true;
@@ -219,11 +234,12 @@ public class GamePanel extends JPanel implements Runnable {
 			updateStatusMessage();
 		}
 
+		// Process Mouse Clicks
 		if (mouse.clicked) {
 			int col = mouse.x / Board.SQUARE_SIZE;
 			int row = mouse.y / Board.SQUARE_SIZE;
 
-			// Reset the click state immediately after capturing it
+			// Reset the click state after processing
 			mouse.resetClick();
 
 			if (activeP == null) {
@@ -234,6 +250,7 @@ public class GamePanel extends JPanel implements Runnable {
 							piece.getRow() == row) {
 
 						activeP = piece;
+						//original poistion
 						startCol = piece.getCol();
 						startRow = piece.getRow();
 						activeP.setPreCol(startCol);
@@ -242,13 +259,16 @@ public class GamePanel extends JPanel implements Runnable {
 						break;
 					}
 				}
-			} else {
+			}
+			else {
 				// Second click: Move the selected piece
 				if (activeP.getCol() == col && activeP.getRow() == row) {
 					// Clicked on the same piece again, deselect it
 					activeP = null;
-				} else if (board.isValidPosition(col, row) && isLegalMove(activeP, col, row)) {
-					// Check for piece at target position
+				}
+				//Check if move is valid
+				else if (board.isValidPosition(col, row) && isLegalMove(activeP, col, row)) {
+					// Check if the target square is occupied
 					Piece pieceAtTarget = null;
 					for (Piece p : simPieces) {
 						if (p != activeP && p.getCol() == col && p.getRow() == row) {
@@ -266,16 +286,6 @@ public class GamePanel extends JPanel implements Runnable {
 						}
 					}
 
-					// REMOVE this check to allow king captures
-					// (We now allow kings to capture protected pieces)
-                /*
-                // Critical check: Prevent capturing a king
-                if (pieceAtTarget instanceof King) {
-                    System.out.println("ERROR: Attempted to capture a king! This is an illegal move.");
-                    activeP = null;
-                    return;
-                }
-                */
 
 					// Special case: Check if a king is capturing a protected piece
 					boolean capturedProtectedPiece = false;
@@ -298,21 +308,19 @@ public class GamePanel extends JPanel implements Runnable {
 								}
 
 								// The piece is protected! But we'll allow the king to capture it anyway
-								System.out.println("WARNING: King is capturing a protected piece - this will result in king capture next turn!");
 								capturedProtectedPiece = true;
 								break;
 							}
 						}
 					}
 
-					// Remove the captured piece safely (not during iteration)
+					// Remove the captured piece safely
 					if (pieceAtTarget != null) {
-						System.out.println("Capturing " + pieceAtTarget.getClass().getSimpleName() +
-								" at " + col + "," + row);
-						simPieces.remove(pieceAtTarget);
+
+						simPieces.remove(pieceAtTarget);// remove from the arraylist
 					}
 
-					// Move the piece
+					// Move the selected piece
 					activeP.setCol(col);
 					activeP.setRow(row);
 					activeP.setX(col * Board.SQUARE_SIZE);
@@ -327,9 +335,10 @@ public class GamePanel extends JPanel implements Runnable {
 						}
 					}
 
-					// Switch turn
+					// Switch turn(ternary operator)condition ? valueIfTrue : valueIfFalse;
 					currentColor = (currentColor == WHITE) ? BLACK : WHITE;
-					activeP = null;
+					activeP = null; //no piece is currently selected
+
 
 					// If a king captured a protected piece, we'll let the auto-capture
 					// function handle it on the next update cycle - no need to
@@ -337,22 +346,23 @@ public class GamePanel extends JPanel implements Runnable {
 
 					// Only check for check/checkmate if we didn't just capture a protected piece
 					if (!capturedProtectedPiece) {
-						// Check if this move put the opponent's king in check
+						// to check if king is under attack
 						boolean kingInCheck = GameState.isKingInCheck(simPieces, currentColor);
 
 						if (kingInCheck) {
-							System.out.println("King is in check! Checking for checkmate...");
 
 							// Use the improved checkmate detection
 							if (isCheckmate()) {
 								gameState = GameState.CHECKMATE;
 								gameOver = true;
 								System.out.println("CHECKMATE detected!");
-							} else {
+							}
+							else {
 								gameState = GameState.CHECK;
 								System.out.println("CHECK - King can still escape");
 							}
-						} else {
+						}
+						else {
 							// Not in check, but check
 							boolean hasLegalMoves = false;
 
@@ -374,7 +384,8 @@ public class GamePanel extends JPanel implements Runnable {
 
 							if (hasLegalMoves) {
 								gameState = GameState.ONGOING;
-							} else {
+							}
+							else {
 								gameState = GameState.STALEMATE;
 								gameOver = true;
 								System.out.println("STALEMATE - no legal moves but not in check");
@@ -701,29 +712,7 @@ public class GamePanel extends JPanel implements Runnable {
 		return false;
 	}
 
-	/**
-	 * Complete replacement for isLegalMove in GamePanel
-	 */
-	/**
-	 * Improved isLegalMove method for GamePanel.java
-	 * This properly handles all check and checkmate scenarios
-	 * including protected piece captures
-	 */
 
-	/**
-	 * Comprehensive method to check if a move is legal
-	 * This checks all chess rules including:
-	 * - Basic piece movement rules
-	 * - Capturing opponent's pieces
-	 * - Special king rules for check and protected pieces
-	 * - Never allowing a king to be captured
-	 */
-	/**
-	 * Safe isLegalMove method that avoids ConcurrentModificationException
-	 */
-	/**
-	 * Update your existing isLegalMove method to include this special king capture handling:
-	 */
 	/**
 	 * Modified isLegalMove method to allow kings to capture protected pieces,
 	 * which will then result in the king being captured on the next turn
