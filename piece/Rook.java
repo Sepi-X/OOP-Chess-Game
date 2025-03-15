@@ -1,6 +1,7 @@
 package piece;
 
 import main.GamePanel;
+import main.Position;
 
 public class Rook extends Piece {
     private boolean hasMoved = false;
@@ -12,6 +13,20 @@ public class Rook extends Piece {
         }
         else {
             setImage(getImage("/piece/b-rook")) ;
+        }
+    }
+
+    /**
+     * Overloaded constructor that takes a Position object instead of separate coordinates.
+     * Demonstrates method overloading for constructor polymorphism.
+     */
+    public Rook(int color, Position position) {
+        super(color, position);
+        if (color == GamePanel.WHITE) {
+            setImage(getImage("/piece/w-rook"));
+        }
+        else {
+            setImage(getImage("/piece/b-rook"));
         }
     }
 
