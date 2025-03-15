@@ -2,6 +2,7 @@
 package piece;
 
 import main.GamePanel;
+import main.Position;
 
 public class Bishop extends Piece {
     public Bishop(int color, int col, int row) {
@@ -13,6 +14,16 @@ public class Bishop extends Piece {
             setImage(getImage("/piece/b-bishop")) ;
         }
     }
+    public Bishop(int color, Position position) {
+        super(color, position);
+        if (color == GamePanel.WHITE) {
+            setImage(getImage("/piece/w-bishop"));
+        }
+        else {
+            setImage(getImage("/piece/b-bishop"));
+        }
+    }
+
 
     @Override
     public boolean canMove(int targetCol, int targetRow) {
