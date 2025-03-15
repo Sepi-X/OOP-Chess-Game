@@ -1,6 +1,7 @@
 package piece;
 
 import main.GamePanel;
+import main.Position;
 
 public class Knight extends Piece {
     public Knight(int color, int col, int row) {
@@ -12,7 +13,19 @@ public class Knight extends Piece {
             setImage(getImage("/piece/b-knight"));
         }
     }
-
+    /**
+     * Overloaded constructor that takes a Position object instead of separate coordinates.
+     * Demonstrates method overloading for constructor polymorphism.
+     */
+    public Knight(int color, Position position) {
+        super(color, position);
+        if (color == GamePanel.WHITE) {
+            setImage(getImage("/piece/w-knight"));
+        }
+        else {
+            setImage(getImage("/piece/b-knight"));
+        }
+    }
     @Override
     public boolean canMove(int targetCol, int targetRow) {
         // First check if the target position is within the board
