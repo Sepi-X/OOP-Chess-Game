@@ -1,6 +1,7 @@
 package piece;
 
 import main.GamePanel;
+import main.Position;
 
 public class King extends Piece {
     private boolean hasMoved = false;
@@ -14,6 +15,20 @@ public class King extends Piece {
             setImage(getImage("/piece/b-king"));
         }
     }
+    /**
+     * Overloaded constructor that takes a Position object instead of separate coordinates.
+     * Demonstrates method overloading for constructor polymorphism.
+     */
+    public King(int color, Position position) {
+        super(color, position);
+        if (color == GamePanel.WHITE) {
+            setImage(getImage("/piece/w-king"));
+        }
+        else {
+            setImage(getImage("/piece/b-king"));
+        }
+    }
+
     @Override
     public boolean canMove(int targetCol, int targetRow) {
         // First check if the target position is within the board
