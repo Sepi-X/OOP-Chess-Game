@@ -1,6 +1,7 @@
 package piece;
 
 import main.GamePanel;
+import main.Position;
 
 public class Queen extends Piece {
     public Queen(int color, int col, int row) {
@@ -8,6 +9,19 @@ public class Queen extends Piece {
         if (color == GamePanel.WHITE) {
             setImage(getImage("/piece/w-queen")) ;
         } else {
+            setImage(getImage("/piece/b-queen"));
+        }
+    }
+    /**
+     * Overloaded constructor that takes a Position object instead of separate coordinates.
+     * Demonstrates method overloading for constructor polymorphism.
+     */
+    public Queen(int color, Position position) {
+        super(color, position);
+        if (color == GamePanel.WHITE) {
+            setImage(getImage("/piece/w-queen"));
+        }
+        else {
             setImage(getImage("/piece/b-queen"));
         }
     }
