@@ -1,6 +1,7 @@
 package piece;
 
 import main.GamePanel;
+import main.Position;
 
 public class Pawn extends Piece {
     private boolean hasMoved = false;
@@ -10,6 +11,20 @@ public class Pawn extends Piece {
         if (color == GamePanel.WHITE) {
             setImage(getImage("/piece/w-pawn"));
         } else {
+            setImage(getImage("/piece/b-pawn"));
+        }
+    }
+
+    /**
+     * Overloaded constructor that takes a Position object instead of separate coordinates.
+     * Demonstrates method overloading for constructor polymorphism.
+     */
+    public Pawn(int color, Position position) {
+        super(color, position);
+        if (color == GamePanel.WHITE) {
+            setImage(getImage("/piece/w-pawn"));
+        }
+        else {
             setImage(getImage("/piece/b-pawn"));
         }
     }
