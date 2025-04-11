@@ -1,6 +1,5 @@
 package main;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -21,24 +20,36 @@ import piece.Rook;
 public class GamePanel extends JPanel implements Runnable {
 
 	//game window size
-	public static  int WIDTH = 1100;
-	public static  int HEIGHT = 800;
+	private static  int WIDTH = 1100;
+	private static  int HEIGHT = 800;
 	//Frame Per Second
-	final int FPS = 60;
+	private final int FPS = 60;
 	//Manages the game loop
 	Thread gameThread;
 
+	//has a board
 	Board board = new Board(); //chessboard
+	//has a mouse
 	Mouse mouse = new Mouse(); //Mouse Interaction
 
-	// Pieces Storage
-	public static ArrayList<Piece> pieces = new ArrayList<>();//stores all active pieces
-	public static ArrayList<Piece> simPieces = new ArrayList<>();//copy of pieces
+	// Pieces Storage( has pieces)
+	private static ArrayList<Piece> pieces = new ArrayList<>();//stores all active pieces
+	private static ArrayList<Piece> simPieces = new ArrayList<>();//copy of pieces
+	public static ArrayList<Piece> getSimPieces() {
+		return simPieces;
+	}
 	Piece activeP;//currently selected (active) piece
 
 	// Color Constants
-	public static final int WHITE = 0;
-	public static final int BLACK = 1;
+	private static final int WHITE = 0;
+	public static int getWhite(){
+		return WHITE;
+	}
+	private static final int BLACK = 1;
+	public static int getBlack(){
+		return BLACK;
+	}
+
 	int currentColor = WHITE;// keeps track of turns
 
 	// Variables for Move Validation
@@ -46,14 +57,14 @@ public class GamePanel extends JPanel implements Runnable {
 	private int startRow;
 
 	// Game state variables
-	private int gameState = GameState.ONGOING; //stores the current state
+	private int gameState = GameState.getOngiong(); //stores the current state
 	private boolean gameOver = false; // true = game ends
 	private String statusMessage = ""; //store messages
 
 	//Constructor & Initialization
 	public GamePanel() {
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
-		setBackground(Color.gray);
+		setBackground(Color.pink);
 		// Mouse move pieces
 		addMouseMotionListener(mouse);
 		addMouseListener(mouse);
@@ -71,39 +82,43 @@ public class GamePanel extends JPanel implements Runnable {
 	//Initializing chess pieces
 	public void setPieces() {
 		// White team
-		pieces.add(new Pawn(WHITE, 0, 6));
+
+		pieces.add(new Pawn(WHITE, new Position(0, 6)));
 		pieces.add(new Pawn(WHITE, 1, 6));
 		pieces.add(new Pawn(WHITE, 2, 6));
 		pieces.add(new Pawn(WHITE, 3, 6));
 		pieces.add(new Pawn(WHITE, 4, 6));
 		pieces.add(new Pawn(WHITE, 5, 6));
 		pieces.add(new Pawn(WHITE, 6, 6));
-		pieces.add(new Pawn(WHITE, 7, 6));
-		pieces.add(new Rook(WHITE, 0, 7));
+		pieces.add(new Pawn(WHITE, new Position(7, 6)));
+		pieces.add(new Rook(WHITE, new Position(0, 7)));
 		pieces.add(new Rook(WHITE, 7, 7));
-		pieces.add(new Knight(WHITE, 1, 7));
+		pieces.add(new Knight(WHITE, new Position(1, 7)));
 		pieces.add(new Knight(WHITE, 6, 7));
-		pieces.add(new Bishop(WHITE, 2, 7));
+		pieces.add(new Bishop(WHITE, new Position(2, 7)));
 		pieces.add(new Bishop(WHITE, 5, 7));
+
 		pieces.add(new Queen(WHITE, 3, 7));
-		pieces.add(new King(WHITE, 4, 7));
+		pieces.add(new King(WHITE, new Position(4, 7)));
 
 		// Black team
-		pieces.add(new Pawn(BLACK, 0, 1));
+
+		pieces.add(new Pawn(BLACK, new Position(0, 1)));
 		pieces.add(new Pawn(BLACK, 1, 1));
 		pieces.add(new Pawn(BLACK, 2, 1));
 		pieces.add(new Pawn(BLACK, 3, 1));
 		pieces.add(new Pawn(BLACK, 4, 1));
 		pieces.add(new Pawn(BLACK, 5, 1));
 		pieces.add(new Pawn(BLACK, 6, 1));
-		pieces.add(new Pawn(BLACK, 7, 1));
-		pieces.add(new Rook(BLACK, 0, 0));
+		pieces.add(new Pawn(BLACK, new Position(7, 1)));
+		pieces.add(new Rook(BLACK, new Position(0, 0)));
 		pieces.add(new Rook(BLACK, 7, 0));
-		pieces.add(new Knight(BLACK, 1, 0));
+		pieces.add(new Knight(BLACK, new Position(1, 0)));
 		pieces.add(new Knight(BLACK, 6, 0));
-		pieces.add(new Bishop(BLACK, 2, 0));
+		pieces.add(new Bishop(BLACK, new Position(2, 0)));
 		pieces.add(new Bishop(BLACK, 5, 0));
-		pieces.add(new Queen(BLACK, 3, 0));
+		pieces.add(new Queen(BLACK, new Position(3, 0)));
+
 		pieces.add(new King(BLACK, 4, 0));
 	}
 
@@ -182,7 +197,7 @@ public class GamePanel extends JPanel implements Runnable {
 	private void update() {
 		if (gameOver) {
 			// Game is over, no more moves allowed
-			if (mouse.clicked) {
+			if (mouse.isClicked()) {
 				mouse.resetClick();
 			}
 			return;
@@ -214,7 +229,7 @@ public class GamePanel extends JPanel implements Runnable {
 
 		// If Black King is missing, the game should end immediately
 		if (!whiteKingExists) {
-			gameState = GameState.CHECKMATE;
+			gameState = GameState.getCheckMate();
 			currentColor = BLACK; // Set black as winner
 			gameOver = true;
 			statusMessage = "Checkmate! Black wins!";
@@ -222,7 +237,7 @@ public class GamePanel extends JPanel implements Runnable {
 			//If Black King is missing, the game should end immediately
 		}
 		else if (!blackKingExists) {
-			gameState = GameState.CHECKMATE;
+			gameState = GameState.getCheckMate();
 			currentColor = WHITE; // Set white as winner
 			gameOver = true;
 			statusMessage = "Checkmate! White wins!";
@@ -230,14 +245,14 @@ public class GamePanel extends JPanel implements Runnable {
 		}
 
 		// If we have a new game state (check, checkmate), update the message
-		if (gameState != GameState.ONGOING) {
+		if (gameState != GameState.getOngiong()) {
 			updateStatusMessage();
 		}
 
 		// Process Mouse Clicks
-		if (mouse.clicked) {
-			int col = mouse.x / Board.SQUARE_SIZE;
-			int row = mouse.y / Board.SQUARE_SIZE;
+		if (mouse.isClicked()) {
+			int col = mouse.getX() / Board.SQUARE_SIZE;
+			int row = mouse.getY() / Board.SQUARE_SIZE;
 
 			// Reset the click state after processing
 			mouse.resetClick();
@@ -353,12 +368,12 @@ public class GamePanel extends JPanel implements Runnable {
 
 							// Use the improved checkmate detection
 							if (isCheckmate()) {
-								gameState = GameState.CHECKMATE;
+								gameState = GameState.getCheckMate();
 								gameOver = true;
 								System.out.println("CHECKMATE detected!");
 							}
 							else {
-								gameState = GameState.CHECK;
+								gameState = GameState.getCheck();
 								System.out.println("CHECK - King can still escape");
 							}
 						}
@@ -383,10 +398,10 @@ public class GamePanel extends JPanel implements Runnable {
 							}
 
 							if (hasLegalMoves) {
-								gameState = GameState.ONGOING;
+								gameState = GameState.getOngiong();
 							}
 							else {
-								gameState = GameState.STALEMATE;
+								gameState = GameState.getStalemate();
 								gameOver = true;
 								System.out.println("STALEMATE - no legal moves but not in check");
 							}
@@ -398,7 +413,7 @@ public class GamePanel extends JPanel implements Runnable {
 
 					// If game is over, print message
 					if (gameOver) {
-						System.out.println("GAME OVER: " + (gameState == GameState.CHECKMATE ? "Checkmate" : "Stalemate"));
+						System.out.println("GAME OVER: " + (gameState == GameState.getCheckMate() ? "Checkmate" : "Stalemate"));
 					}
 				} else {
 					// Invalid move - either clicked elsewhere on board or clicked invalid destination
@@ -430,15 +445,18 @@ public class GamePanel extends JPanel implements Runnable {
 		String colorName = (currentColor == WHITE) ? "White" : "Black";
 
 		switch (gameState) {
-			case GameState.CHECK:
+			case 0: // GameState.ONGOING
+				statusMessage = "";
+				break;
+			case 1: // GameState.CHECK
 				statusMessage = colorName + " is in check!";
 				break;
-			case GameState.CHECKMATE:
+			case 2: // GameState.CHECKMATE
 				String winner = (currentColor == WHITE) ? "Black" : "White";
 				statusMessage = "Checkmate! " + winner + " wins!";
 				break;
-			case GameState.STALEMATE:
-				statusMessage = "Stalemate! ";
+			case 3: // GameState.STALEMATE
+				statusMessage = "Stalemate!";
 				break;
 			default:
 				statusMessage = "";
@@ -472,7 +490,7 @@ public class GamePanel extends JPanel implements Runnable {
 		}
 
 		// Highlight king in red if it's in check or checkmate
-		if (gameState == GameState.CHECK || gameState == GameState.CHECKMATE) {
+		if (gameState == GameState.getCheck() || gameState == GameState.getCheckMate()) {
 			for (Piece p : simPieces) {
 				if (p instanceof King && p.getColor() == currentColor) {
 					g2.setColor(new Color(255, 0, 0, 100));  // Semi-transparent red
@@ -517,6 +535,7 @@ public class GamePanel extends JPanel implements Runnable {
 		}
 	}
 
+	// in king class
 	public static boolean isKingInCheck(int kingColor) {
 
 		return GameState.isKingInCheck(simPieces, kingColor);
@@ -529,7 +548,8 @@ public class GamePanel extends JPanel implements Runnable {
 	 * which will then result in the king being captured on the next turn
 	 */
 	private boolean isLegalMove(Piece piece, int targetCol, int targetRow) {
-		// Basic validation - can the piece move to this position according to its rules?
+		// First, it checks if the move is valid according to the specific
+		// chess piece's movement rules by calling the piece's canMove method
 		if (!piece.canMove(targetCol, targetRow)) {
 			return false;
 		}
@@ -541,94 +561,15 @@ public class GamePanel extends JPanel implements Runnable {
 			}
 		}
 
-		// Check if target contains opponent's king - this should NEVER be allowed
-		for (Piece p : simPieces) {
-			if (p instanceof King && p.getColor() != piece.getColor() &&
-					p.getCol() == targetCol && p.getRow() == targetRow) {
-				System.out.println("ERROR: Cannot capture a king!");
-				return false;
-			}
-		}
 
-		// SPECIAL CASE: Allow kings to capture protected pieces
-		if (piece instanceof King) {
-			// Find the piece at the target position (if any)
-			Piece targetPiece = null;
-			for (Piece p : simPieces) {
-				if (p != piece && p.getCol() == targetCol && p.getRow() == targetRow) {
-					targetPiece = p;
-					break;
-				}
-			}
 
-			// If the king is capturing an opponent's piece, check if it's protected
-			if (targetPiece != null && targetPiece.getColor() != piece.getColor()) {
-				// We'll check if the target is protected, but unlike standard chess,
-				// we'll ALLOW the capture even if it's protected!
-				boolean isProtected = false;
-
-				for (Piece defender : simPieces) {
-					// Skip pieces of same color as king and the piece being captured
-					if (defender.getColor() == piece.getColor() || defender == targetPiece) {
-						continue;
-					}
-
-					// Can this piece protect the target?
-					if (defender.canMove(targetCol, targetRow)) {
-						// For pieces that need a clear path, check if the path is clear
-						if (!(defender instanceof Knight)) {
-							// Check if path is blocked by another piece
-							if (defender.checkPath(targetCol, targetRow)) {
-								continue; // Path is blocked
-							}
-						}
-
-						// The piece is protected! But we'll allow the king to capture it anyway
-						// This will trigger game over in the next turn
-						System.out.println("WARNING: King is capturing a protected piece at " +
-								targetCol + "," + targetRow + " - this will result in king capture next turn!");
-						isProtected = true;
-						return true; // ALLOW THE KING TO CAPTURE A PROTECTED PIECE
-					}
-				}
-
-				// If we get here and the piece isn't protected, it's a normal legal capture
-				System.out.println("King can safely capture unprotected piece");
-				return true;
-			}
-
-			// For non-capture moves, check if the target square is under attack
-			else if (targetPiece == null) {
-				for (Piece attacker : simPieces) {
-					// Skip pieces of same color as king
-					if (attacker.getColor() == piece.getColor()) {
-						continue;
-					}
-
-					// Can this piece attack the target square?
-					if (attacker.canMove(targetCol, targetRow)) {
-						// For pieces that need a clear path, check if the path is clear
-						if (!(attacker instanceof Knight)) {
-							// Check if path is blocked by another piece
-							if (attacker.checkPath(targetCol, targetRow)) {
-								continue; // Path is blocked
-							}
-						}
-
-						System.out.println("King cannot move to attacked square at " +
-								targetCol + "," + targetRow);
-						return false;
-					}
-				}
-			}
-		}
 
 		// Standard check for all non-king pieces:
 		// Save the original position
 		int originalCol = piece.getCol();
 		int originalRow = piece.getRow();
 
-		// Find any piece at the target position (to be captured)
+		// Find any piece at the target position to be captured
 		Piece capturedPiece = null;
 		for (Piece p : simPieces) {
 			if (p != piece && p.getCol() == targetCol && p.getRow() == targetRow) {
@@ -662,7 +603,6 @@ public class GamePanel extends JPanel implements Runnable {
 
 	/**
 	 * Special method to accurately determine if the game is in checkmate
-	 * Add this method to your GamePanel class
 	 */
 	private boolean isCheckmate() {
 		// First, verify that the current player's king is in check
@@ -687,7 +627,7 @@ public class GamePanel extends JPanel implements Runnable {
 			return false;
 		}
 
-		// Check all possible king moves (including captures)
+		// Check all possible king moves including captures
 		int kingCol = king.getCol();
 		int kingRow = king.getRow();
 
@@ -753,16 +693,17 @@ public class GamePanel extends JPanel implements Runnable {
 			}
 		}
 
-		if (opponentKing == null) return;
+		if (opponentKing == null)
+			return;
 
 		// Check if any of our pieces can capture the opponent's king
 		for (Piece p : simPieces) {
-			if (p.getColor() == currentColor &&
-					p.canMove(opponentKing.getCol(), opponentKing.getRow()) &&
-					!p.checkPath(opponentKing.getCol(), opponentKing.getRow())) {
-
-				captureKing(p, opponentKing);
-				break;
+			if (p.getColor() == currentColor && p.canMove(opponentKing.getCol(), opponentKing.getRow())) {
+				// Knights don't need path checking since they can jump
+				if (p instanceof Knight || !p.checkPath(opponentKing.getCol(), opponentKing.getRow())) {
+					captureKing(p, opponentKing);
+					break;
+				}
 			}
 		}
 	}
@@ -781,11 +722,12 @@ public class GamePanel extends JPanel implements Runnable {
 
 		// End the game
 		gameOver = true;
-		gameState = GameState.CHECKMATE;
+		gameState = GameState.getCheckMate();
 		statusMessage = (currentColor == GamePanel.WHITE ? "White" : "Black") + " wins by mate!";
 	}
 
-	// Update status message game turn
+	// Add this method to your GamePanel class
+
 
 
 }
