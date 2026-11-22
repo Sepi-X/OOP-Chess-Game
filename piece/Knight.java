@@ -6,7 +6,7 @@ import main.Position;
 public class Knight extends Piece {
     public Knight(int color, int col, int row) {
         super(color, col, row);
-        if (color == GamePanel.WHITE) {
+        if (color == GamePanel.getWhite()) {
             setImage(getImage("/piece/w-knight"));
         }
         else {
@@ -19,7 +19,7 @@ public class Knight extends Piece {
      */
     public Knight(int color, Position position) {
         super(color, position);
-        if (color == GamePanel.WHITE) {
+        if (color == GamePanel.getWhite()) {
             setImage(getImage("/piece/w-knight"));
         }
         else {
@@ -34,7 +34,7 @@ public class Knight extends Piece {
         }
 
         // Check for piece of same color at target
-        for (Piece p : GamePanel.simPieces) {
+        for (Piece p : GamePanel.getSimPieces()) {
             if (p != this && p.getCol() == targetCol && p.getRow() == targetRow && p.getColor() == this.getColor()) {
                 return false;
             }

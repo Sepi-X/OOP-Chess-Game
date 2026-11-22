@@ -8,7 +8,7 @@ public class King extends Piece {
 
     public King(int color, int col, int row) {
         super(color, col, row);
-        if (color == GamePanel.WHITE) {
+        if (color == GamePanel.getWhite()) {
             setImage(getImage("/piece/w-king"));
         }
         else {
@@ -21,7 +21,7 @@ public class King extends Piece {
      */
     public King(int color, Position position) {
         super(color, position);
-        if (color == GamePanel.WHITE) {
+        if (color == GamePanel.getWhite()) {
             setImage(getImage("/piece/w-king"));
         }
         else {
@@ -41,7 +41,7 @@ public class King extends Piece {
         int rowDiff = Math.abs(targetRow - getPreRow());
 
         // Check for piece of same color at target
-        for (Piece p : GamePanel.simPieces) {
+        for (Piece p : GamePanel.getSimPieces()) {
             if (p != this && p.getCol() == targetCol && p.getRow() == targetRow && p.getColor() == this.getColor()) {
                 return false;
             }
@@ -71,7 +71,7 @@ public class King extends Piece {
 
         // Find the rook for castling
         Rook rook = null;
-        for (Piece p : GamePanel.simPieces) {
+        for (Piece p : GamePanel.getSimPieces()) {
             if (p instanceof Rook && p.getColor() == this.getColor() && p.getCol() == rookCol && p.getRow() == this.getRow()) {
                 rook = (Rook) p;
                 break;
@@ -98,7 +98,7 @@ public class King extends Piece {
             int checkCol = getPreCol() + (direction * i);
 
             // Check if this intermediate square is under attack
-            for (Piece attacker : GamePanel.simPieces) {
+            for (Piece attacker : GamePanel.getSimPieces()) {
                 if (attacker.getColor() != this.getColor() && attacker.canMove(checkCol, getPreRow())) {
                     // For pieces that need a clear path, check if the path is clear
                     if (!(attacker instanceof Knight) && attacker.checkPath(checkCol, getPreRow())) {
@@ -119,7 +119,7 @@ public class King extends Piece {
         int newRookCol = isKingSideCastling ? targetCol - 1 : targetCol + 1;
 
         // Find the rook for castling
-        for (Piece p : GamePanel.simPieces) {
+        for (Piece p : GamePanel.getSimPieces()) {
             if (p instanceof Rook && p.getColor() == this.getColor() && p.getCol() == rookCol && p.getRow() == this.getRow()) {
                 // Move the rook
                 p.setCol(newRookCol);

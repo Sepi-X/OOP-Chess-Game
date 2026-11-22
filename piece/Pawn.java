@@ -8,7 +8,7 @@ public class Pawn extends Piece {
 
     public Pawn(int color, int col, int row) {
         super(color, col, row);
-        if (color == GamePanel.WHITE) {
+        if (color == GamePanel.getWhite()) {
             setImage(getImage("/piece/w-pawn"));
         } else {
             setImage(getImage("/piece/b-pawn"));
@@ -21,7 +21,7 @@ public class Pawn extends Piece {
      */
     public Pawn(int color, Position position) {
         super(color, position);
-        if (color == GamePanel.WHITE) {
+        if (color == GamePanel.getWhite()) {
             setImage(getImage("/piece/w-pawn"));
         }
         else {
@@ -30,7 +30,7 @@ public class Pawn extends Piece {
     }
 
     public boolean canBePromoted() {
-        return (getColor() == GamePanel.WHITE && getRow() == 0) || (getColor() == GamePanel.BLACK && getRow() == 7);
+        return (getColor() == GamePanel.getWhite() && getRow() == 0) || (getColor() == GamePanel.getBlack() && getRow() == 7);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class Pawn extends Piece {
         boolean isTargetOccupied = false;
         boolean isTargetEnemy = false;
 
-        for (Piece piece : GamePanel.simPieces) {
+        for (Piece piece : GamePanel.getSimPieces()) {
             if (piece != this && piece.getCol() == targetCol && piece.getRow() == targetRow) {
                 isTargetOccupied = true;
                 isTargetEnemy = (piece.getColor() != this.getColor());
@@ -53,7 +53,7 @@ public class Pawn extends Piece {
         }
 
         // White pawns move up (decreasing row), black pawns move down (increasing row)
-        if (getColor() == GamePanel.WHITE) {
+        if (getColor() == GamePanel.getWhite()) {
             // Diagonal capture for white
             if (Math.abs(targetCol - getPreCol()) == 1 && targetRow == getPreRow() - 1) {
                 return isTargetOccupied && isTargetEnemy;
@@ -74,7 +74,7 @@ public class Pawn extends Piece {
                 // Two squares forward from starting position
                 if (!hasMoved && targetRow == getPreRow() - 2) {
                     // Check if path is clear
-                    for (Piece piece : GamePanel.simPieces) {
+                    for (Piece piece : GamePanel.getSimPieces()) {
                         if (piece != this && piece.getCol() == targetCol && piece.getRow() == getPreRow() - 1) {
                             return false;
                         }
@@ -103,7 +103,7 @@ public class Pawn extends Piece {
                 // Two squares forward from starting position
                 if (!hasMoved && targetRow == getPreRow() + 2) {
                     // Check if path is clear
-                    for (Piece piece : GamePanel.simPieces) {
+                    for (Piece piece : GamePanel.getSimPieces()) {
                         if (piece != this && piece.getCol() == targetCol && piece.getRow() == getPreRow() + 1) {
                             return false;
                         }
