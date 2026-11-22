@@ -57,7 +57,7 @@ public class GamePanel extends JPanel implements Runnable {
 	private int startRow;
 
 	// Game state variables
-	private int gameState = GameState.getOngiong(); //stores the current state
+	private int gameState = GameState.getOngoing(); //stores the current state
 	private boolean gameOver = false; // true = game ends
 	private String statusMessage = ""; //store messages
 
@@ -245,7 +245,7 @@ public class GamePanel extends JPanel implements Runnable {
 		}
 
 		// If we have a new game state (check, checkmate), update the message
-		if (gameState != GameState.getOngiong()) {
+		if (gameState != GameState.getOngoing()) {
 			updateStatusMessage();
 		}
 
@@ -398,7 +398,7 @@ public class GamePanel extends JPanel implements Runnable {
 							}
 
 							if (hasLegalMoves) {
-								gameState = GameState.getOngiong();
+								gameState = GameState.getOngoing();
 							}
 							else {
 								gameState = GameState.getStalemate();
@@ -723,7 +723,7 @@ public class GamePanel extends JPanel implements Runnable {
 		// End the game
 		gameOver = true;
 		gameState = GameState.getCheckMate();
-		statusMessage = (currentColor == GamePanel.WHITE ? "White" : "Black") + " wins by mate!";
+		statusMessage = (currentColor == GamePanel.getWhite() ? "White" : "Black") + " wins by mate!";
 	}
 
 	// Add this method to your GamePanel class

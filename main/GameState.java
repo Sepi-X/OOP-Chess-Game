@@ -12,6 +12,11 @@ public class GameState {
     public static final int CHECKMATE = 2;
     public static final int STALEMATE = 3;
 
+    public static int getOngoing() { return ONGOING; }
+    public static int getCheck() { return CHECK; }
+    public static int getCheckMate() { return CHECKMATE; }
+    public static int getStalemate() { return STALEMATE; }
+
 
 
     /**

@@ -36,6 +36,10 @@ public class Mouse extends MouseAdapter {
 		y = e.getY();
 	}
 
+	public int getX() { return x; }
+	public int getY() { return y; }
+	public boolean isClicked() { return clicked; }
+
 	// Method to reset the click state after it's been processed
 	public void resetClick() {
 		clicked = false;
